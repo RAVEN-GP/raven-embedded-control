@@ -12,9 +12,9 @@ The project contains all the software present on the Nucleo board, together with
 
 ---
 
-## 🦅 AXEL Team Modifications
+## 🦅 RAVEN Team Modifications
 
-This fork contains modifications by **Team AXEL** for the 2025-26 BFMC competition. Below are the changes from the [original Bosch repository](https://github.com/ECC-BFMC/Embedded_Platform).
+This fork contains modifications by **Team RAVEN** for the 2025-26 BFMC competition. Below are the changes from the [original Bosch repository](https://github.com/ECC-BFMC/Embedded_Platform).
 
 ### [003a] Speed PID Controller
 
@@ -50,7 +50,7 @@ This fork contains modifications by **Team AXEL** for the 2025-26 BFMC competiti
 
 ---
 
-### Future Tasks
-- [ ] 003b - Steering Calibration
-- [ ] 003c - Lane Keeping
-- [ ] 004 - Traffic Sign Detection 
+### In Progress / Upcoming Tasks
+- [/] 004a - Serial Message Lexer
+- [/] 004b - Command Parser
+- [/] 004c - Dead Man's Switch
