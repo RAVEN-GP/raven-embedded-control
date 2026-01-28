@@ -1,34 +1,21 @@
 # .clangd configuration for BFMC Embedded Platform
 # 
-# This file suppresses lint errors that occur when mbed-os SDK is not installed.
-# The code compiles correctly with mbed-tools when the SDK is deployed.
-#
-# These suppressions are ONLY for IDE/editor experience - they don't affect
-# the actual build which uses mbed-tools compile.
+# This configures clangd to use stub headers when mbed-os is not installed.
+# The actual build uses mbed-tools which has the real mbed-os SDK.
 
 CompileFlags:
   Add:
-    # Add include paths that clangd needs
-    - "-I../include"
+    # Use stub headers for IDE (before other includes)
+    - "-I.ide-stubs"
+    # Project include paths
     - "-I./include"
-    # Suppress errors about missing mbed headers
-    - "-Wno-error"
-  
+    - "-Iinclude"
+    # C++ standard
+    - "-std=c++17"
+    # Suppress some warnings
+    - "-Wno-unknown-pragmas"
+    - "-Wno-unused-parameter"
+
 Diagnostics:
-  Suppress:
-    # Suppress "file not found" errors for mbed-os headers
-    - "pp_file_not_found"
-    # Suppress undeclared identifier errors for mbed types
-    - "undeclared_var_use"
-    - "unknown_typename"
-    - "expected_class_name"
-    - "typecheck_nonviable_condition"
   UnusedIncludes: None
   MissingIncludes: None
-
-# Ignore mbed-os directory entirely (if deployed)
-If:
-  PathMatch: mbed-os/.*
-Then:
-  Diagnostics:
-    Suppress: ["*"]
