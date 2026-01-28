@@ -1,11 +1,12 @@
 /**
  * Copyright (c) 2019, Bosch Engineering Center Cluj and BFMC organizers
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
 
- * 1. Redistributions of source code must retain the above copyright notice, this
+ * 1. Redistributions of source code must retain the above copyright notice,
+ this
  *    list of conditions and the following disclaimer.
 
  * 2. Redistributions in binary form must reproduce the above copyright notice,
@@ -18,7 +19,8 @@
 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE
  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -41,15 +43,19 @@ uint16_t uint16_globalsV_battery_totalVoltage = 0;
 uint16_t uint16_globalsV_battery_mAmps_user = 0;
 uint16_t readings[11] = {0}; // Buffer for the last 10 readings
 
-uint8_t  uint8_globalsV_value_of_kl       = 0;
+uint8_t uint8_globalsV_value_of_kl = 0;
 // Variables for filtering
 uint8_t uint8_globalsV_alpha_scaled = 25; // EMA coefficient scaled from 0.025
 uint8_t uint8_globalsV_windowSize = 10; // Window size for the averaging filter
-uint8_t uint8_globalsV_index = 0; // buffer index
+uint8_t uint8_globalsV_index = 0;       // buffer index
 
-bool bool_globalsV_imu_isActive     = false;
+bool bool_globalsV_imu_isActive = false;
 bool bool_globalsV_instant_isActive = false;
 bool bool_globalsV_battery_isActive = false;
-bool bool_globalsV_resource_isActive= false;
+bool bool_globalsV_resource_isActive = false;
 bool bool_globalsV_ShuttedDown = false;
 bool bool_globalsV_warningFlag = false;
+
+// Speed PID Controller - IMU velocity sharing (mm/s * 1000 for precision)
+int32_t int32_globalsV_velocity_x_mms = 0;
+int32_t int32_globalsV_velocity_y_mms = 0;
