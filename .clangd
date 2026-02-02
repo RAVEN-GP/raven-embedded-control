@@ -1,0 +1,21 @@
+# .clangd configuration for BFMC Embedded Platform
+# 
+# This configures clangd to use stub headers when mbed-os is not installed.
+# The actual build uses mbed-tools which has the real mbed-os SDK.
+
+CompileFlags:
+  Add:
+    # Use stub headers for IDE (before other includes)
+    - "-I.ide-stubs"
+    # Project include paths
+    - "-I./include"
+    - "-Iinclude"
+    # C++ standard
+    - "-std=c++17"
+    # Suppress some warnings
+    - "-Wno-unknown-pragmas"
+    - "-Wno-unused-parameter"
+
+Diagnostics:
+  UnusedIncludes: None
+  MissingIncludes: None

@@ -1,0 +1,32 @@
+{
+    // C/C++ IntelliSense Configuration for BFMC Embedded Platform
+    // 
+    // NOTE: This project uses mbed-os which requires the SDK to be deployed
+    // via `mbed-tools deploy`. Without the SDK, the IDE will show lint errors
+    // for mbed-specific types. These are suppressed by .clangd config.
+    
+    "C_Cpp.errorSquiggles": "disabled",
+    "C_Cpp.intelliSenseEngine": "disabled",
+    
+    // Use clangd instead (respects .clangd config)
+    "clangd.path": "clangd",
+    "clangd.arguments": [
+        "--background-index",
+        "--clang-tidy=false",
+        "--header-insertion=never"
+    ],
+    
+    // File associations
+    "files.associations": {
+        "*.hpp": "cpp",
+        "*.cpp": "cpp"
+    },
+    
+    // Exclude mbed-os from search/watch (large folder)
+    "files.watcherExclude": {
+        "**/mbed-os/**": true
+    },
+    "search.exclude": {
+        "**/mbed-os/**": true
+    }
+}
