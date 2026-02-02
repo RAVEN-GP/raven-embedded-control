@@ -346,4 +346,74 @@ namespace brain{
         sprintf(response,"1");
     }
 
+    void CRobotStateMachine::serialCallbackMPCcommand(char const * message, char * response)
+    {
+        // Format options:
+        // 1) "#mpc:STEER;;"              -> steering only
+        // 2) "#mpc:SPEED;STEER;;"        -> speed + steering
+        //
+        // Units:
+        // - SPEED is in the same units as existing speed commands (mm/s in your setup)
+        // - STEER is in the same units as existing steer commands (e.g. 120 = 12.0 deg if your stack uses *10)
+
+        if(uint8_globalsV_value_of_kl != 30){
+            sprintf(response, "kl 30 is required!!");
+            return;
+        }
+
+        int speed = 0;
+        int steer = 0;
+
+        // Try parse "speed;steer"
+        int parsed = sscanf(message, "%d;%d", &speed, &steer);
+
+        // If only one number given, treat it as steer
+        if(parsed == 1){
+            steer = speed;
+            speed = 0;
+            parsed = 1;
+        }
+
+        if(parsed != 1 && parsed != 2){
+            sprintf(response, "syntax error");
+            return;
+        }
+
+        // Clamp to safe ranges using existing drivers
+        steer = m_steeringControl.inRange(steer);
+
+        // OPTIONAL speed set
+        if(parsed == 2){
+            speed = m_speedingControl.inRange(speed);
+        }
+
+        // --- Anti-jitter: limit how fast steering can change per command ---
+        // (Keeps things smooth even if the high-level controller is noisy)
+        const int MAX_STEER_STEP = 12; // tune: smaller = smoother, larger = faster response
+
+        if(!m_mpc_hasLastSteer){
+            m_mpc_lastSteer = steer;
+            m_mpc_hasLastSteer = true;
+        } else {
+            int diff = steer - m_mpc_lastSteer;
+            if(diff >  MAX_STEER_STEP) steer = m_mpc_lastSteer + MAX_STEER_STEP;
+            if(diff < -MAX_STEER_STEP) steer = m_mpc_lastSteer - MAX_STEER_STEP;
+            m_mpc_lastSteer = steer;
+        }
+
+        // Apply immediately (no state machine timing)
+        m_steeringControl.setAngle(steer);
+        if(parsed == 2){
+            m_speedingControl.setSpeed(speed);
+        }
+
+        // Reply
+        if(parsed == 2){
+            sprintf(response, "%d;%d", speed, steer);
+        } else {
+            sprintf(response, "%d", steer);
+        }
+    }
+
+
 }; // namespace brain
