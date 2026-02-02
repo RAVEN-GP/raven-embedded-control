@@ -78,6 +78,8 @@ namespace brain
             void serialCallbackSteerLimitscommand(char const * message, char * response);
             /* Serial callback method for alive */
             void serialCallbackAlivecommand(char const * message, char * response);
+            /* Serial callback method for MPC (high-level steering/speed) */
+            void serialCallbackMPCcommand(char const * message, char * response);
 
         private:
             /* Contains the state machine, which control the lower level drivers (motor and steering) based the current state. */
@@ -101,6 +103,11 @@ namespace brain
             int m_steering;
 
             bool m_calibON;
+
+            // --- MPC smoothing state (anti-jitter) ---
+            int  m_mpc_lastSteer = 0;
+            bool m_mpc_hasLastSteer = false;
+
         
     }; // class CRobotStateMachine
 }; // namespace brain

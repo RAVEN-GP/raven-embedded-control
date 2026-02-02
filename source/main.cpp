@@ -88,6 +88,7 @@ drivers::CSerialMonitor::CSerialSubscriberMap g_serialMonitorSubscribers = {
     {"vcdCalib",       mbed::callback(&g_robotstatemachine, &brain::CRobotStateMachine::serialCallbackVCDCalibcommand)},
     {"steerLimits",    mbed::callback(&g_robotstatemachine, &brain::CRobotStateMachine::serialCallbackSteerLimitscommand)},
     {"alive",          mbed::callback(&g_robotstatemachine, &brain::CRobotStateMachine::serialCallbackAlivecommand)},
+    {"mpc",            mbed::callback(&g_robotstatemachine, &brain::CRobotStateMachine::serialCallbackMPCcommand)},
     {"battery",        mbed::callback(&g_totalvoltage,      &periodics::CTotalVoltage::serialCallbackTOTALVcommand)},
     {"instant",        mbed::callback(&g_instantconsumption,&periodics::CInstantConsumption::serialCallbackINSTANTcommand)},
     {"imu",            mbed::callback(&g_imu,               &periodics::CImu::serialCallbackIMUcommand)},
