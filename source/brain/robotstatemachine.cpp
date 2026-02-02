@@ -60,6 +60,7 @@ namespace brain{
         , m_speed(0)
         , m_steering(0)
         , m_calibON(false)
+        , m_deadManSwitch(f_speedingControl, 500)
     {
     }
 
@@ -83,7 +84,7 @@ namespace brain{
         {
             // speed state - control the dc motor rotation speed and the steering angle. 
             case 1:
-                m_speedingControl.setSpeed(m_speed); // Set the reference speed
+                m_deadManSwitch.applySafeSpeed(m_speed); // Apply speed through safety wrapper (dead man switch)
                 snprintf(buffer, sizeof(buffer), "@speed:%d;;\r\n", m_speed);
                 m_serialPort.write(buffer, strlen(buffer));
                 m_state = 0;
@@ -111,7 +112,7 @@ namespace brain{
                 // If the accumulated ticks exceed the target time, stop the movement and deactivate the task.
                 if(m_ticksRun >= m_targetTime+m_period)
                 {
-                    m_speedingControl.setSpeed(0);
+                    m_deadManSwitch.applySafeSpeed(0); // Force speed to zero through safety wrapper
                     m_steeringControl.setAngle(0);
                     m_state = 0;
 
@@ -149,14 +150,8 @@ namespace brain{
         {
             if(uint8_globalsV_value_of_kl == 30)
             {
-                // if(!m_speedingControl.inRange(l_speed)){ // Check the received reference speed is within range
-                //     sprintf(b,"The reference speed command is too high/low");
-                //     return;
-                // }
-
-                // m_state = 1;
-
-                // m_speed = l_speed;
+                // Reset dead man switch watchdog on valid command
+                m_deadManSwitch.resetWatchdog();
 
                 m_state = 1;
                 m_speed = m_speedingControl.inRange(l_speed);
@@ -189,14 +184,8 @@ namespace brain{
         {
             if(uint8_globalsV_value_of_kl == 30)
             {
-                // if( !m_steeringControl.inRange(l_angle)){ // Check the received steering angle
-                //     sprintf(b,"The steering angle command is too high/low");
-                //     return;
-                // }
-
-                // m_state = 2;
-
-                // m_steering = l_angle;
+                // Reset dead man switch watchdog on valid command
+                m_deadManSwitch.resetWatchdog();
 
                 m_state = 2;
                 m_steering = m_steeringControl.inRange(l_angle);
@@ -225,14 +214,8 @@ namespace brain{
         uint32_t l_res = sscanf(a,"%d",&l_angle);
         if(1 == l_res)
         {
-            // if(!m_steeringControl.inRange(l_angle)){
-            //     sprintf(b,"The steering angle command is too high/low");
-            //     return;
-            // }
-            
-            // m_state = 3;
-
-            // m_steering = l_angle;
+            // Reset dead man switch watchdog on valid command
+            m_deadManSwitch.resetWatchdog();
             
             m_state = 3;
             m_steering = m_steeringControl.inRange(l_angle);
@@ -268,6 +251,9 @@ namespace brain{
 
         if(parsed == 3 && speed < 501 && speed > -501 && steer < 233 && steer > -233)
         {
+            // Reset dead man switch watchdog on valid command
+            m_deadManSwitch.resetWatchdog();
+
             sprintf(response, "%d;%d;%d", speed, steer, time_deciseconds);
 
             m_ticksRun = 0;
@@ -309,6 +295,9 @@ namespace brain{
 
         if(parsed == 3 && speed < 501 && speed > -501 && steer < 273 && steer > -273)
         {
+            // Reset dead man switch watchdog on valid command
+            m_deadManSwitch.resetWatchdog();
+
             m_ticksRun = 0;
 
             m_targetTime = time_deciseconds * scale_ds_to_ms;
@@ -360,6 +349,9 @@ namespace brain{
             sprintf(response, "kl 30 is required!!");
             return;
         }
+
+        // Reset dead man switch watchdog on valid command
+        m_deadManSwitch.resetWatchdog();
 
         int speed = 0;
         int steer = 0;

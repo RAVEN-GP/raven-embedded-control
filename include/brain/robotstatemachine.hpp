@@ -39,6 +39,8 @@
 #include <drivers/steeringmotor.hpp>
 /* Header file for the task manager library, which  applies periodically the fun function of it's children*/
 #include <utils/taskmanager.hpp>
+/* Header file for dead man switch safety */
+#include <utils/deadmanswitch.hpp>
 
 #include <brain/globalsv.hpp>
 
@@ -107,6 +109,9 @@ namespace brain
             // --- MPC smoothing state (anti-jitter) ---
             int  m_mpc_lastSteer = 0;
             bool m_mpc_hasLastSteer = false;
+
+            // --- Dead man switch for motor safety ---
+            utils::CDeadManSwitch m_deadManSwitch;
 
         
     }; // class CRobotStateMachine
