@@ -1,0 +1,15 @@
+.mbedbuild
+cmake_build/*
+!cmake_build/NUCLEO_F401RE/develop/GCC_ARM/robot_car.bin
+mbed-os/
+.vscode.ide-stubs/
+
+# IDE - stub headers for local development (not needed in repo)
+.ide-stubs/
+
+# clangd cache
+.cache/
+
+# VSCode - ignore all except settings.json (for IDE lint suppression)
+.vscode/*
+!.vscode/settings.json
