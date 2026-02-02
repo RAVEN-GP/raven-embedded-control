@@ -1,56 +1,34 @@
-# BFMC - Embedded platform project
+# RAVEN - Embedded Control ("The Spinal Cord")
 
-The project contains all the software present on the Nucleo board, together with the documentation on how to create new components and what are the features of the given one. Some of the feature are:
-- Communication protocol between RPi and Nucleo,
-- Motors control,
-- IMU readings
-- Notifications from Power Board
-- Architecture prone to features addition
+![Raven Embedded](https://img.shields.io/badge/Component-Embedded-orange) ![Status](https://img.shields.io/badge/Status-Active-success)
 
-## The documentation is available in details here:
-[Documentation](https://bosch-future-mobility-challenge-documentation.readthedocs-hosted.com/data/embeddedplatform.html) 
+The **Embedded Control** firmware runs on the **STM32 Nucleo** board. It provides low-level hardware abstraction, real-time motor control, and safety features.
+
+## 📚 Documentation
+> **Full Technical Documentation:** [bosch-future-mobility-challenge-documentation.readthedocs-hosted.com](https://bosch-future-mobility-challenge-documentation.readthedocs-hosted.com)
 
 ---
 
-## 🦅 RAVEN Team Modifications
+## 🚀 Key Features
 
-This fork contains modifications by **Team RAVEN** for the 2025-26 BFMC competition. Below are the changes from the [original Bosch repository](https://github.com/ECC-BFMC/Embedded_Platform).
+| Task ID | Feature Name | Description |
+| :--- | :--- | :--- |
+| **[003a]** | **Speed PID Controller** | Closed-loop velocity control using IMU feedback and dynamic gain tuning. |
+| **[003b]** | **Steering & MPC** | Servo control with anti-jitter and Model Predictive Control command support. |
+| **[004a]** | **Message Lexer** | Efficient parsing of incoming serial packets (e.g., `#SPEED:15.5;;`). |
+| **[004b]** | **Command Parser** | Routes parsed commands to appropriate subsystems (Motors, Sensors). |
+| **[004c]** | **Dead Man's Switch** | Safety watchdog that stops the car if the Brain disconnects (>500ms). |
 
-### [003a] Speed PID Controller
+## 🛠️ Usage
 
-**Branch:** `003a-speed-pid-controller`  
-**Mission:** Maintain constant velocity using closed-loop control.
+### Flashing
+Use Mbed Studio or CLI to compile and flash:
+```bash
+mbed compile -t GCC_ARM -m NUCLEO_F401RE --flash
+```
 
-#### New Features
-- **Closed-loop velocity control** using IMU-based feedback
-- **Serial-configurable PID gains** — tune without reflashing!
-- **Anti-windup protection** for stable response
-- **Feedforward compensation** for fast setpoint tracking
-
-#### New Serial Commands
-| Command | Format | Description |
-|---------|--------|-------------|
-| `pidGains` | `Kp;Ki;Kd` (×100) | Set PID gains at runtime |
-| `pidTarget` | `speed_mm_s` | Set target speed |
-| `pidEnable` | `0\|1` | Enable/disable PID |
-| `pidStatus` | `0` | Query controller state |
-
-#### Files Changed
-| File | Modification |
-|------|--------------|
-| `include/periodics/speedpidcontroller.hpp` | **NEW** |
-| `source/periodics/speedpidcontroller.cpp` | **NEW** |
-| `include/brain/globalsv.hpp` | + velocity globals |
-| `source/brain/globalsv.cpp` | + velocity globals |
-| `source/periodics/imu.cpp` | + velocity export |
-| `source/main.cpp` | + PID integration |
-| `docs/SPEED_PID_CONTROLLER.md` | **NEW** - Full documentation |
-
-📖 **Full documentation:** [docs/SPEED_PID_CONTROLLER.md](docs/SPEED_PID_CONTROLLER.md)
-
----
-
-### In Progress / Upcoming Tasks
-- [/] 004a - Serial Message Lexer
-- [/] 004b - Command Parser
-- [/] 004c - Dead Man's Switch
+### Serial Commands
+Connect via USB (Baud: 115200) to send manual commands:
+- `#SPEED:20.0;;` (Set speed to 20 cm/s)
+- `#STEER:15.0;;` (Set steer angle to 15 deg)
+- `#BRAKE:1;;` (Emergency Stop)
