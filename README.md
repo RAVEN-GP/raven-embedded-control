@@ -27,8 +27,30 @@ Use Mbed Studio or CLI to compile and flash:
 mbed compile -t GCC_ARM -m NUCLEO_F401RE --flash
 ```
 
+
 ### Serial Commands
 Connect via USB (Baud: 115200) to send manual commands:
-- `#SPEED:20.0;;` (Set speed to 20 cm/s)
-- `#STEER:15.0;;` (Set steer angle to 15 deg)
-- `#BRAKE:1;;` (Emergency Stop)
+- `#speed:20.0;;` (Set speed to 20 cm/s)
+- `#steer:15.0;;` (Set steer angle to 15 deg)
+- `#brake:1;;` (Emergency Stop)
+
+---
+
+## ⚡ Arduino Nano RP2040 Connect (New)
+
+We now support the Arduino Nano RP2040 Connect as an alternative to the Nucleo.
+
+### Pinout (H-Bridge Driver)
+- **Speed Motor (L298N)**:
+  - `IN1`: Pin 7
+  - `IN2`: Pin 8
+  - `EN`: Pin 9 (PWM)
+- **Steering Servo**:
+  - `Signal`: Pin 11
+- **IMU**: Built-in LSM6DSOX
+
+### Flashing
+Use the `raven` CLI to flash the Arduino firmware:
+```bash
+raven flash --arch arduino
+```

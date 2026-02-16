@@ -11,6 +11,7 @@
  * - H-Bridge Motor Driver (IN1=7, IN2=8, EN=9)
  * - Servo for Steering on Pin 11
  * - Built-in IMU (LSM6DSOX)
+ * - Wi-Fi UDP Listener on Port 4210
  */
 
 #include <Arduino.h>
@@ -28,6 +29,11 @@ const int LED_BUILTIN_PIN = LED_BUILTIN;
 // Wi-Fi Configuration
 const char *WIFI_SSID = "AREA51";
 const char *WIFI_PASS = "LeaveMyWifiAlonePlease";
+
+// Wi-Fi UDP
+WiFiUDP Udp;
+const int UDP_PORT = 4210;
+char packetBuffer[255];
 
 // Protocol Constants
 const char MSG_START = '#';
@@ -47,6 +53,7 @@ void stopMotor();
 void setMotorSpeed(float speed);
 void setSteering(float angle);
 void handleSerial();
+void handleUDP();
 void handleIMU();
 void processMessage(String msg);
 void printFloat(float val);
@@ -98,6 +105,7 @@ void setup() {
   Serial.print("#               #\r\n");
   Serial.print("#   I'm alive   #\r\n");
   Serial.print("#   (Arduino)   #\r\n");
+  Serial.print("#   + UDP 4210  #\r\n");
   Serial.print("#               #\r\n");
   Serial.print("#################\r\n");
   Serial.print("\r\n");
@@ -110,12 +118,41 @@ void setup() {
     Serial.print("# IP: ");
     Serial.print(ip);
     Serial.print("\r\n");
+
+    // Start UDP
+    Udp.begin(UDP_PORT);
+    Serial.print("# UDP: Listening on port ");
+    Serial.println(UDP_PORT);
   }
 }
 
 void loop() {
   handleSerial();
+  handleUDP();
   handleIMU();
+}
+
+// ============================================
+// UDP PROTOCOL HANDLER
+// ============================================
+void handleUDP() {
+  int packetSize = Udp.parsePacket();
+  if (packetSize) {
+    int len = Udp.read(packetBuffer, 255);
+    if (len > 0) {
+      packetBuffer[len] = 0;
+    }
+    String msg = String(packetBuffer);
+
+    // Clean up msg
+    msg.trim();
+
+    // Process if it looks like a command #KEY:VAL;;
+    if (msg.startsWith("#") && msg.endsWith(";;")) {
+      msg = msg.substring(1, msg.length() - 2); // Remove # and ;;
+      processMessage(msg);
+    }
+  }
 }
 
 // ============================================
@@ -207,13 +244,13 @@ void setMotorSpeed(float speed) {
   }
 
   if (speed > 0) {
-    // Forward
-    digitalWrite(IN1, HIGH);
-    digitalWrite(IN2, LOW);
-  } else if (speed < 0) {
-    // Backward
+    // Forward (Inverted: W was Backwards)
     digitalWrite(IN1, LOW);
     digitalWrite(IN2, HIGH);
+  } else if (speed < 0) {
+    // Backward (Inverted: S was Forwards)
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
   } else {
     // Stop
     stopMotor();
@@ -221,10 +258,6 @@ void setMotorSpeed(float speed) {
   }
 
   analogWrite(PIN_MOTOR_EN, pwm);
-
-  // Debug
-  // Serial.print("@debug:Speed="); Serial.print(speed); Serial.print(",PWM=");
-  // Serial.println(pwm);
 }
 
 void setSteering(float angle) {
