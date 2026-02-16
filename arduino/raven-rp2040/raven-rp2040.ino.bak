@@ -1,0 +1,72 @@
+/*
+ * Hardware Test Sketch
+ * simpler than the main firmware.
+ *
+ * 1. Blinks LED
+ * 2. Sweeps Servo (Pin 11)
+ * 3. Spins Motor Forward/Backward (Pins 7,8,9)
+ */
+
+#include <Arduino.h>
+#include <Servo.h>
+
+const int IN1 = 7;
+const int IN2 = 8;
+const int EN = 9;
+const int SERVO_PIN = 11;
+
+Servo steeringServo;
+
+void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(EN, OUTPUT);
+
+  steeringServo.attach(SERVO_PIN);
+  steeringServo.write(90);
+
+  analogWrite(EN, 0);
+  delay(1000);
+}
+
+void loop() {
+  // 1. Blink
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(100);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(100);
+
+  // 2. Servo Sweep
+  steeringServo.write(60); // Leftish
+  delay(500);
+  steeringServo.write(120); // Rightish
+  delay(500);
+  steeringServo.write(90); // Center
+  delay(500);
+
+  // 3. Motor Test
+  // Forward
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+
+  // Ramp Up
+  for (int i = 70; i < 255; i += 10) {
+    analogWrite(EN, i);
+    delay(50);
+  }
+  delay(500);
+  analogWrite(EN, 0);
+  delay(500);
+
+  // Backward
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  for (int i = 70; i < 255; i += 10) {
+    analogWrite(EN, i);
+    delay(50);
+  }
+  delay(500);
+  analogWrite(EN, 0);
+  delay(2000);
+}
