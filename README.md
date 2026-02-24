@@ -40,7 +40,10 @@ Connect via USB (Baud: 115200) to send manual commands:
 
 We now support the Arduino Nano RP2040 Connect as an alternative to the Nucleo.
 
-### Pinout (H-Bridge Driver)
+### Pinout (RP2040 Connect)
+- **Wheel Encoders**:
+  - `CLK`: Pin 2 (Hardware Interrupt)
+  - `DT`: Pin 3
 - **Speed Motor (L298N)**:
   - `IN1`: Pin 7
   - `IN2`: Pin 8
@@ -49,7 +52,7 @@ We now support the Arduino Nano RP2040 Connect as an alternative to the Nucleo.
   - `Signal`: Pin 11
 - **IMU**: Built-in LSM6DSOX
 
-### Flashing
+### Flashing (Arduino-CLI)
 Use the `raven` CLI to flash the Arduino firmware:
 ```bash
 raven flash --arch arduino
