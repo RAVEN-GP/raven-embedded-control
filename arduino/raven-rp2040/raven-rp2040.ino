@@ -26,6 +26,10 @@ const int PIN_MOTOR_EN = 9; // PWM Speed Control
 const int SERVO_PIN = 11;   // Steering Servo Signal
 const int LED_BUILTIN_PIN = LED_BUILTIN;
 
+// Encoder Pins
+const int ENC_CLK = 2;
+const int ENC_DT = 3;
+
 // Wi-Fi Configuration
 const char *WIFI_SSID = "AREA51";
 const char *WIFI_PASS = "LeaveMyWifiAlonePlease";
@@ -47,6 +51,10 @@ bool imuActive = true;
 unsigned long lastImuTime = 0;
 const int IMU_INTERVAL = 100; // 10Hz
 
+volatile long encoderPos = 0;
+unsigned long lastEncoderTime = 0;
+const int ENCODER_INTERVAL = 100; // 10Hz (matching IMU)
+
 // Forward Declarations
 void initMotors();
 void stopMotor();
@@ -55,6 +63,8 @@ void setSteering(float angle);
 void handleSerial();
 void handleUDP();
 void handleIMU();
+void handleEncoder();
+void updateEncoder();
 void processMessage(String msg);
 void printFloat(float val);
 
@@ -77,6 +87,11 @@ void setup() {
 
   // Init Pins
   pinMode(LED_BUILTIN_PIN, OUTPUT);
+
+  // Init Encoder
+  pinMode(ENC_CLK, INPUT);
+  pinMode(ENC_DT, INPUT);
+  attachInterrupt(digitalPinToInterrupt(ENC_CLK), updateEncoder, CHANGE);
 
   // Init Motors
   initMotors();
@@ -130,6 +145,7 @@ void loop() {
   handleSerial();
   handleUDP();
   handleIMU();
+  handleEncoder();
 }
 
 // ============================================
@@ -313,3 +329,27 @@ void handleIMU() {
 }
 
 void printFloat(float val) { Serial.print(val, 3); }
+
+// ============================================
+// ENCODER HANDLER
+// ============================================
+void updateEncoder() {
+  int clkState = digitalRead(ENC_CLK);
+  int dtState = digitalRead(ENC_DT);
+
+  if (clkState == dtState) {
+    encoderPos++;
+  } else {
+    encoderPos--;
+  }
+}
+
+void handleEncoder() {
+  if (millis() - lastEncoderTime >= ENCODER_INTERVAL) {
+    // Send encoder position
+    Serial.print("@encoder:");
+    Serial.print(encoderPos);
+    Serial.print(";;\r\n");
+    lastEncoderTime = millis();
+  }
+}
