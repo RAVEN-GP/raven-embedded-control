@@ -100,6 +100,13 @@ volatile bool imuEnabled = false;   // telemetry + yaw updates
 
 String rxLine = "";                 // accumulates serial data until ";;"
 
+// ===================== DEAD MAN'S SWITCH =====================
+// If no serial command is received within this timeout, STOP the motor.
+// This prevents the car from running away if the Pi crashes or disconnects.
+const unsigned long WATCHDOG_TIMEOUT_MS = 500;  // 500ms = 0.5 seconds
+unsigned long lastCommandMs = 0;                // timestamp of last valid command
+bool watchdogTriggered = false;
+
 // Map speed command to m/s target (keeps your working speed controller)
 float speedCmdToTargetMs(int s) {
   const float MAX_MS = 0.50f; // tune
@@ -311,6 +318,10 @@ void handleCommand(const String &cmd) {
     // #auto:0;; cancels
     if (valInt == 0) autoCancel();
   }
+
+  // Reset watchdog on ANY valid command
+  lastCommandMs = millis();
+  watchdogTriggered = false;
 }
 
 void readSerialCommands() {
@@ -599,6 +610,8 @@ void setup() {
   stopMotor();
   setSteerDeg(SERVO_CENTER);
 
+  lastCommandMs = millis();  // Initialize watchdog timer
+
   Serial.println("READY:");
   Serial.println("Teleop: #speed:X;;  #steer:A;;  #brake:0;;  #imu:0/1;;");
   Serial.println("Auto:   #drive:meters;;   #turn:deg;;   #auto:0;;");
@@ -612,6 +625,22 @@ void loop() {
   unsigned long now = millis();
   if (now - lastLoopMs < (1000 / CONTROL_HZ)) return;
   lastLoopMs = now;
+
+  // ── DEAD MAN'S SWITCH ──────────────────────────────────────────────
+  // If no command received for 500ms, STOP the motor immediately.
+  if (lastCommandMs > 0 && (now - lastCommandMs) > WATCHDOG_TIMEOUT_MS) {
+    if (!watchdogTriggered) {
+      stopMotor();
+      setSteerDeg(SERVO_CENTER);
+      cmdSpeed = 0;
+      cmdSteer = 0;
+      cmdBrake = false;
+      if (autoState != AUTO_NONE) autoCancel();
+      watchdogTriggered = true;
+      Serial.println("@watchdog:TRIGGERED — no command in 500ms, MOTOR STOPPED;;");
+    }
+    return;  // Skip all control until a new command arrives
+  }
 
   // 3) If auto is active -> run auto tick (ignores teleop speed/steer until done)
   if (autoState != AUTO_NONE) {
